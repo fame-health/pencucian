@@ -309,11 +309,24 @@
     transform: translateY(-2px);
 }
 
+.transaction-detail-photo {
+    display: block;
+    width: 100%;
+    height: 18rem;
+    border-radius: 0.875rem;
+    background: #f1f5f9;
+    object-fit: cover;
+}
+
 .mobile-wash-action {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
 @media (max-width: 767px) {
+    .transaction-detail-photo {
+        height: 14rem;
+    }
+
     .wash-vehicle-step .fi-sc-component {
         min-width: 0;
     }
@@ -415,6 +428,10 @@
 }
 
 @media (max-width: 379px) {
+    .transaction-detail-photo {
+        height: 12rem;
+    }
+
     .wash-vehicle-options.fi-grid-direction-col {
         grid-template-columns: minmax(0, 1fr);
     }

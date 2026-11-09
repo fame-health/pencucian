@@ -30,7 +30,11 @@ class TransactionService
 
             // Unique Transaction Number: TRX-YYYYMMDD-XXXX
             $datePrefix = date('Ymd');
-            $todayCount = WashTransaction::whereDate('created_at', today())->count() + 1;
+            $todayStart = today()->startOfDay();
+            $todayCount = WashTransaction::query()
+                ->where('created_at', '>=', $todayStart)
+                ->where('created_at', '<', $todayStart->copy()->addDay())
+                ->count() + 1;
             $transactionNumber = 'TRX-'.$datePrefix.'-'.str_pad($todayCount, 4, '0', STR_PAD_LEFT);
 
             /** @var WashTransaction $transaction */

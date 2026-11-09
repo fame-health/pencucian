@@ -10,6 +10,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -97,66 +98,65 @@ class RevenueReport extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        $query = WashTransaction::query()
-            ->where('status', 'completed');
-
-        if (!empty($data['from_date'])) {
-            $query->whereDate('created_at', '>=', $data['from_date']);
-        }
-
-        if (!empty($data['until_date'])) {
-            $query->whereDate('created_at', '<=', $data['until_date']);
-        }
+        $query = $this->applyReportDateRange(
+            WashTransaction::query()->where('status', 'completed'),
+            $data,
+        );
 
         if (!empty($data['washer_id'])) {
             $query->where('washer_id', $data['washer_id']);
         }
 
-        $totalOmzet = (float) $query->sum('price');
-        $totalCommission = (float) $query->sum('commission_amount');
-        $totalRevenue = (float) $query->sum('business_revenue');
-        $totalCount = $query->count();
+        $summary = $query
+            ->selectRaw('COUNT(*) as total_count, COALESCE(SUM(price), 0) as total_omzet, COALESCE(SUM(commission_amount), 0) as total_commission, COALESCE(SUM(business_revenue), 0) as total_revenue')
+            ->first();
 
         return [
-            'total_omzet' => $totalOmzet,
-            'total_commission' => $totalCommission,
-            'total_revenue' => $totalRevenue,
-            'total_count' => $totalCount,
+            'total_omzet' => (float) $summary->total_omzet,
+            'total_commission' => (float) $summary->total_commission,
+            'total_revenue' => (float) $summary->total_revenue,
+            'total_count' => (int) $summary->total_count,
         ];
     }
 
     public function getWasherBreakdownProperty()
     {
         $data = $this->form->getState();
+        $summaries = $this->applyReportDateRange(
+            WashTransaction::query()->where('status', 'completed'),
+            $data,
+        )
+            ->select('washer_id')
+            ->selectRaw('COUNT(*) as total_washes, COALESCE(SUM(price), 0) as total_omzet, COALESCE(SUM(commission_amount), 0) as total_commission')
+            ->groupBy('washer_id')
+            ->get()
+            ->keyBy('washer_id');
 
         return User::role('washer')
-            ->withCount(['washTransactions as total_washes' => function ($q) use ($data) {
-                $q->where('status', 'completed');
-                if (!empty($data['from_date'])) {
-                    $q->whereDate('created_at', '>=', $data['from_date']);
-                }
-                if (!empty($data['until_date'])) {
-                    $q->whereDate('created_at', '<=', $data['until_date']);
-                }
-            }])
-            ->withSum(['washTransactions as total_omzet' => function ($q) use ($data) {
-                $q->where('status', 'completed');
-                if (!empty($data['from_date'])) {
-                    $q->whereDate('created_at', '>=', $data['from_date']);
-                }
-                if (!empty($data['until_date'])) {
-                    $q->whereDate('created_at', '<=', $data['until_date']);
-                }
-            }], 'price')
-            ->withSum(['washTransactions as total_commission' => function ($q) use ($data) {
-                $q->where('status', 'completed');
-                if (!empty($data['from_date'])) {
-                    $q->whereDate('created_at', '>=', $data['from_date']);
-                }
-                if (!empty($data['until_date'])) {
-                    $q->whereDate('created_at', '<=', $data['until_date']);
-                }
-            }], 'commission_amount')
-            ->get();
+            ->get(['id', 'name', 'email'])
+            ->each(function (User $washer) use ($summaries): void {
+                $summary = $summaries->get($washer->id);
+                $washer->setAttribute('total_washes', (int) ($summary->total_washes ?? 0));
+                $washer->setAttribute('total_omzet', (float) ($summary->total_omzet ?? 0));
+                $washer->setAttribute('total_commission', (float) ($summary->total_commission ?? 0));
+            });
+    }
+
+    /**
+     * Keep date filtering index-friendly by comparing timestamp boundaries.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function applyReportDateRange(Builder $query, array $data): Builder
+    {
+        if (filled($data['from_date'] ?? null)) {
+            $query->where('created_at', '>=', Carbon::parse($data['from_date'])->startOfDay());
+        }
+
+        if (filled($data['until_date'] ?? null)) {
+            $query->where('created_at', '<', Carbon::parse($data['until_date'])->addDay()->startOfDay());
+        }
+
+        return $query;
     }
 }

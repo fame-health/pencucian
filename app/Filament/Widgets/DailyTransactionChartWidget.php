@@ -21,27 +21,30 @@ class DailyTransactionChartWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $days = collect();
-        $counts = collect();
+        $startDate = Carbon::today()->subDays(6);
+        $endDate = Carbon::today()->addDay();
+        $dailyCounts = WashTransaction::query()
+            ->where('created_at', '>=', $startDate)
+            ->where('created_at', '<', $endDate)
+            ->selectRaw('DATE(created_at) as transaction_date, COUNT(*) as transaction_count')
+            ->groupByRaw('DATE(created_at)')
+            ->pluck('transaction_count', 'transaction_date');
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $days->push($date->format('d M'));
-
-            $count = WashTransaction::whereDate('created_at', $date->toDateString())->count();
-            $counts->push($count);
-        }
+        $dates = collect(range(6, 0))
+            ->map(fn (int $daysAgo): Carbon => Carbon::today()->subDays($daysAgo));
+        $days = $dates->map(fn (Carbon $date): string => $date->format('d M'));
+        $counts = $dates->map(fn (Carbon $date): int => (int) ($dailyCounts[$date->toDateString()] ?? 0));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Jumlah Transaksi',
-                    'data' => $counts->toArray(),
+                    'data' => $counts->all(),
                     'backgroundColor' => '#36A2EB',
                     'borderColor' => '#36A2EB',
                 ],
             ],
-            'labels' => $days->toArray(),
+            'labels' => $days->all(),
         ];
     }
 

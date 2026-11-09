@@ -9,6 +9,7 @@
         stepObserver: null,
         captured: false,
         uploading: false,
+        photoSizeKb: null,
         previewUrl: null,
         error: null,
         async startCamera() {
@@ -56,30 +57,73 @@
             this.stream = null;
             this.cameraActive = false;
         },
-        capturePhoto() {
+        async capturePhoto() {
             const video = this.$refs.video;
             const canvas = this.$refs.canvas;
+            const maxBytes = 200 * 1024;
 
             if (! video.videoWidth || ! video.videoHeight) {
                 this.error = 'Kamera belum siap. Tunggu sebentar lalu ambil foto kembali.';
                 return;
             }
 
-            const scale = Math.min(1, 1600 / video.videoWidth);
+            this.uploading = true;
+            this.error = null;
 
-            canvas.width = Math.round(video.videoWidth * scale);
-            canvas.height = Math.round(video.videoHeight * scale);
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            try {
+                const sourceCanvas = document.createElement('canvas');
+                const sourceScale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
 
-            canvas.toBlob((blob) => {
-                if (! blob) {
-                    this.error = 'Foto gagal diproses. Silakan ambil ulang.';
-                    return;
+                sourceCanvas.width = Math.round(video.videoWidth * sourceScale);
+                sourceCanvas.height = Math.round(video.videoHeight * sourceScale);
+
+                const sourceContext = sourceCanvas.getContext('2d');
+
+                if (! sourceContext) {
+                    throw new Error('Kamera tidak dapat menyiapkan gambar untuk dikompres.');
+                }
+
+                sourceContext.drawImage(video, 0, 0, sourceCanvas.width, sourceCanvas.height);
+                this.stopCamera();
+
+                let width = sourceCanvas.width;
+                let height = sourceCanvas.height;
+                let blob = null;
+
+                for (let resizeAttempt = 0; resizeAttempt < 12; resizeAttempt++) {
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const context = canvas.getContext('2d');
+
+                    if (! context) {
+                        throw new Error('Kamera tidak dapat memproses gambar.');
+                    }
+
+                    context.drawImage(sourceCanvas, 0, 0, width, height);
+
+                    for (const quality of [0.82, 0.72, 0.62, 0.52, 0.42, 0.32, 0.24]) {
+                        blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+
+                        if (blob?.size <= maxBytes) {
+                            break;
+                        }
+                    }
+
+                    if (blob?.size <= maxBytes) {
+                        break;
+                    }
+
+                    width = Math.round(width * 0.85);
+                    height = Math.round(height * 0.85);
+                }
+
+                if (! blob || blob.size > maxBytes) {
+                    throw new Error('Foto tidak dapat dikompres hingga maksimal 200 KB. Silakan ambil ulang dengan pencahayaan yang cukup.');
                 }
 
                 const file = new File([blob], `foto-pencucian-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                this.uploading = true;
-                this.error = null;
+                this.photoSizeKb = Math.ceil(blob.size / 1024);
 
                 this.$wire.upload(
                     this.statePath,
@@ -88,18 +132,23 @@
                         this.previewUrl = URL.createObjectURL(blob);
                         this.captured = true;
                         this.uploading = false;
-                        this.stopCamera();
                     },
                     () => {
                         this.uploading = false;
                         this.error = 'Foto gagal diunggah. Periksa koneksi internet lalu coba lagi.';
                     },
                 );
-            }, 'image/jpeg', 0.85);
+            } catch (compressionError) {
+                this.uploading = false;
+                this.error = compressionError instanceof Error
+                    ? compressionError.message
+                    : 'Foto gagal diproses. Silakan ambil ulang.';
+            }
         },
         async retakePhoto() {
             this.captured = false;
             this.error = null;
+            this.photoSizeKb = null;
             this.$wire.set(this.statePath, null);
 
             if (this.previewUrl) {
@@ -139,7 +188,7 @@
 >
     <div class="wash-camera-panel">
         <p class="wash-camera-heading">Foto kondisi kendaraan setelah dicuci</p>
-        <p class="wash-camera-help">Pastikan kendaraan terlihat jelas. Foto diambil langsung dari kamera dan dibatasi maksimal 5 MB.</p>
+        <p class="wash-camera-help">Pastikan kendaraan terlihat jelas. Foto akan dikompres otomatis menjadi JPEG maksimal 200 KB.</p>
 
         <div class="wash-camera-preview">
             <video x-ref="video" x-show="cameraActive && ! captured" autoplay playsinline></video>
@@ -153,8 +202,10 @@
         <canvas x-ref="canvas" class="hidden"></canvas>
 
         <p class="wash-camera-error" x-show="error" x-text="error" role="alert"></p>
-        <p class="wash-camera-success" x-show="captured && ! uploading">Foto berhasil diambil.</p>
-        <p class="wash-camera-help" x-show="uploading">Mengunggah foto...</p>
+        <p class="wash-camera-success" x-show="captured && ! uploading">
+            Foto berhasil diambil dan dikompres (<span x-text="photoSizeKb"></span> KB).
+        </p>
+        <p class="wash-camera-help" x-show="uploading">Mengompres dan mengunggah foto...</p>
 
         <div class="wash-camera-actions">
             <button type="button" class="wash-camera-button wash-camera-button-primary" x-show="! cameraActive && ! cameraStarting && ! captured" x-on:click="startCamera()">

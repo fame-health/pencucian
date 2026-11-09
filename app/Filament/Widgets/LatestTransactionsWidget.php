@@ -28,7 +28,10 @@ class LatestTransactionsWidget extends BaseWidget
             ->query(function (): Builder {
                 /** @var User $user */
                 $user = Auth::user();
-                $query = WashTransaction::query()->latest()->limit(10);
+                $query = WashTransaction::query()
+                    ->with(['washer', 'vehicleType', 'washingService'])
+                    ->latest()
+                    ->limit(10);
 
                 if ($user && $user->hasRole('washer')) {
                     $query->where('washer_id', $user->id);

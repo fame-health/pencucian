@@ -142,4 +142,43 @@ class WashTransactionWizardTest extends TestCase
             'photo_type' => 'after',
         ]);
     }
+
+    public function test_create_rejects_a_photo_larger_than_200_kilobytes(): void
+    {
+        Role::create(['name' => 'washer']);
+
+        $washer = User::factory()->create();
+        $washer->assignRole('washer');
+
+        $vehicleType = VehicleType::create([
+            'name' => 'Matic kecil',
+            'category' => 'motor',
+            'is_active' => true,
+        ]);
+
+        $service = WashingService::create([
+            'vehicle_type_id' => $vehicleType->id,
+            'name' => 'Cuci Reguler',
+            'price' => 20000,
+            'is_active' => true,
+        ]);
+
+        $component = Livewire::actingAs($washer)
+            ->test(CreateWashTransaction::class)
+            ->set('data.vehicle_category', 'motor')
+            ->set('data.vehicle_type_id', $vehicleType->id)
+            ->assertSet('data.washing_service_id', $service->id);
+
+        $wizard = $component->instance()->form->getComponent(
+            fn ($child): bool => $child instanceof Wizard,
+        );
+
+        $component
+            ->call('callSchemaComponentMethod', $wizard->getKey(), 'nextStep', [0])
+            ->set('data.photo_after_capture', UploadedFile::fake()->image('after.jpg')->size(201))
+            ->call('create')
+            ->assertHasErrors(['data.photo_after_capture']);
+
+        $this->assertDatabaseCount('wash_transactions', 0);
+    }
 }

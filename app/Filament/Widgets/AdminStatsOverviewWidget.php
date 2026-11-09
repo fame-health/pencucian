@@ -26,9 +26,20 @@ class AdminStatsOverviewWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $todayWashes = WashTransaction::whereDate('created_at', today())->count();
-        $todayCompleted = WashTransaction::whereDate('created_at', today())->where('status', 'completed')->count();
-        $todayRevenue = WashTransaction::whereDate('created_at', today())->where('status', 'completed')->sum('business_revenue');
+        $todayStart = today()->startOfDay();
+        $tomorrowStart = $todayStart->copy()->addDay();
+        $todayTransactions = WashTransaction::query()
+            ->where('created_at', '>=', $todayStart)
+            ->where('created_at', '<', $tomorrowStart)
+            ->selectRaw(
+                'COUNT(*) as total_washes, SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed_washes, SUM(CASE WHEN status = ? THEN business_revenue ELSE 0 END) as today_revenue',
+                ['completed', 'completed'],
+            )
+            ->first();
+
+        $todayWashes = (int) $todayTransactions->total_washes;
+        $todayCompleted = (int) $todayTransactions->completed_washes;
+        $todayRevenue = (float) $todayTransactions->today_revenue;
         $activeWashers = User::role('washer')->where('is_active', true)->count();
 
         return [

@@ -72,9 +72,9 @@ class CreateWashTransaction extends CreateRecord
             ]);
         }
 
-        if ($photoAfter->getSize() > 5 * 1024 * 1024 || $photoAfter->getMimeType() !== 'image/jpeg') {
+        if ($photoAfter->getSize() > 200 * 1024 || $photoAfter->getMimeType() !== 'image/jpeg') {
             throw ValidationException::withMessages([
-                'data.photo_after_capture' => 'Foto harus berformat JPEG dan berukuran maksimal 5 MB.',
+                'data.photo_after_capture' => 'Foto harus berformat JPEG dan berukuran maksimal 200 KB.',
             ]);
         }
 

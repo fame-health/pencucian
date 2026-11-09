@@ -11,7 +11,10 @@ use App\Models\WashTransaction;
 use App\Services\TransactionService;
 use Filament\Actions;
 use Filament\Forms;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard;
@@ -237,6 +240,118 @@ class WashTransactionResource extends Resource
             ]);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        $isAdmin = $user && $user->hasRole('admin');
+        $canViewCommission = $isAdmin || ($user && $user->hasRole('washer'));
+
+        return $schema
+            ->components([
+                Section::make('Informasi Transaksi')
+                    ->schema([
+                        TextEntry::make('transaction_number')
+                            ->label('Nomor transaksi')
+                            ->copyable()
+                            ->weight('bold'),
+                        TextEntry::make('status')
+                            ->label('Status')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'in_progress' => 'warning',
+                                'completed' => 'success',
+                                'cancelled' => 'danger',
+                            })
+                            ->formatStateUsing(fn (string $state): string => match ($state) {
+                                'in_progress' => 'Sedang diproses',
+                                'completed' => 'Selesai',
+                                'cancelled' => 'Dibatalkan',
+                            }),
+                        TextEntry::make('washer.name')
+                            ->label('Nama pencuci')
+                            ->visible($isAdmin),
+                        TextEntry::make('started_at')
+                            ->label('Waktu mulai')
+                            ->dateTime('d M Y, H:i')
+                            ->placeholder('Tidak tersedia'),
+                        TextEntry::make('completed_at')
+                            ->label('Waktu selesai')
+                            ->dateTime('d M Y, H:i')
+                            ->placeholder('Belum selesai'),
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2]),
+
+                Section::make('Kendaraan dan Layanan')
+                    ->schema([
+                        TextEntry::make('vehicleType.category')
+                            ->label('Kategori kendaraan')
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                'motor' => 'Motor',
+                                'mobil' => 'Mobil',
+                                default => 'Tidak tersedia',
+                            })
+                            ->badge(),
+                        TextEntry::make('vehicleType.name')
+                            ->label('Kelas kendaraan')
+                            ->placeholder('Tidak tersedia'),
+                        TextEntry::make('vehicleType.examples')
+                            ->label('Contoh model')
+                            ->placeholder('Tidak ada contoh model')
+                            ->columnSpanFull(),
+                        TextEntry::make('washingService.name')
+                            ->label('Paket layanan')
+                            ->placeholder('Tidak tersedia'),
+                        TextEntry::make('washingService.description')
+                            ->label('Rincian layanan')
+                            ->placeholder('Tidak ada rincian tambahan')
+                            ->wrap()
+                            ->columnSpanFull(),
+                        TextEntry::make('price')
+                            ->label('Total pembayaran')
+                            ->money('IDR', locale: 'id')
+                            ->size('lg')
+                            ->weight('bold')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2]),
+
+                Section::make('Rincian Pendapatan')
+                    ->schema([
+                        TextEntry::make('commission_amount')
+                            ->label('Komisi pencuci')
+                            ->money('IDR', locale: 'id')
+                            ->visible($canViewCommission),
+                        TextEntry::make('business_revenue')
+                            ->label('Pendapatan usaha')
+                            ->money('IDR', locale: 'id')
+                            ->visible($isAdmin),
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2])
+                    ->visible($canViewCommission),
+
+                Section::make('Foto Pencucian')
+                    ->description('Dokumentasi kendaraan sebelum dan sesudah dicuci.')
+                    ->schema([
+                        ImageEntry::make('photoBefore.photo_path')
+                            ->label('Sebelum dicuci')
+                            ->disk('public')
+                            ->imageWidth('100%')
+                            ->imageHeight('18rem')
+                            ->extraImgAttributes(['class' => 'transaction-detail-photo'])
+                            ->placeholder('Foto sebelum tidak tersedia'),
+                        ImageEntry::make('photoAfter.photo_path')
+                            ->label('Sesudah dicuci')
+                            ->disk('public')
+                            ->imageWidth('100%')
+                            ->imageHeight('18rem')
+                            ->extraImgAttributes(['class' => 'transaction-detail-photo'])
+                            ->placeholder('Foto sesudah tidak tersedia'),
+                    ])
+                    ->columns(['default' => 1, 'sm' => 2]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         /** @var User $user */
@@ -249,12 +364,17 @@ class WashTransactionResource extends Resource
                     ->label('No. Transaksi')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->description(fn (WashTransaction $record): string => implode(' · ', array_filter([
+                        $record->washer?->name,
+                        $record->vehicleType?->name,
+                    ]))),
 
                 Tables\Columns\TextColumn::make('washer.name')
                     ->label('Pencuci')
                     ->searchable()
-                    ->visible($isAdmin),
+                    ->visible($isAdmin)
+                    ->hiddenFrom('md'),
 
                 Tables\Columns\TextColumn::make('vehicleType.name')
                     ->label('Kendaraan')
@@ -273,12 +393,14 @@ class WashTransactionResource extends Resource
                 Tables\Columns\TextColumn::make('commission_amount')
                     ->label('Komisi Pencuci')
                     ->money('IDR', locale: 'id')
-                    ->visible($isAdmin || ($user && $user->hasRole('washer'))),
+                    ->visible($isAdmin || ($user && $user->hasRole('washer')))
+                    ->hiddenFrom('md'),
 
                 Tables\Columns\TextColumn::make('business_revenue')
                     ->label('Pendapatan Usaha')
                     ->money('IDR', locale: 'id')
-                    ->visible($isAdmin),
+                    ->visible($isAdmin)
+                    ->hiddenFrom('md'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -294,20 +416,11 @@ class WashTransactionResource extends Resource
                         'cancelled' => 'Batal',
                     }),
 
-                Tables\Columns\ImageColumn::make('photoBefore.photo_path')
-                    ->label('Foto Sebelum')
-                    ->disk('public')
-                    ->square(),
-
-                Tables\Columns\ImageColumn::make('photoAfter.photo_path')
-                    ->label('Foto Sesudah')
-                    ->disk('public')
-                    ->square(),
-
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Waktu')
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->hiddenFrom('md'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -336,7 +449,12 @@ class WashTransactionResource extends Resource
                     }),
             ])
             ->actions([
-                Actions\ViewAction::make(),
+                Actions\ViewAction::make()
+                    ->label('Lihat detail')
+                    ->modalHeading('Detail transaksi pencucian')
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('4xl')
+                    ->slideOver(),
                 Actions\EditAction::make(),
                 Actions\Action::make('complete')
                     ->label('Selesaikan')
@@ -346,10 +464,11 @@ class WashTransactionResource extends Resource
                     ->form([
                         Forms\Components\FileUpload::make('photo_after')
                             ->label('Foto Sesudah Dicuci (Wajib untuk Selesai)')
+                            ->helperText('Unggah foto JPEG dengan ukuran maksimal 200 KB.')
                             ->image()
                             ->disk('public')
                             ->directory('wash-photos/after')
-                            ->maxSize(5120)
+                            ->maxSize(200)
                             ->required(),
                     ])
                     ->action(function (WashTransaction $record, array $data) {

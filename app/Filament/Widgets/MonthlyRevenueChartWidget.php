@@ -21,31 +21,35 @@ class MonthlyRevenueChartWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $months = collect();
-        $revenues = collect();
+        $yearStart = Carbon::now()->startOfYear();
+        $nextYearStart = $yearStart->copy()->addYear();
+        $monthExpression = match (WashTransaction::query()->getConnection()->getDriverName()) {
+            'mysql', 'mariadb', 'sqlsrv' => 'MONTH(created_at)',
+            'pgsql' => 'EXTRACT(MONTH FROM created_at)',
+            default => "CAST(strftime('%m', created_at) AS INTEGER)",
+        };
+        $monthlyRevenue = WashTransaction::query()
+            ->where('status', 'completed')
+            ->where('created_at', '>=', $yearStart)
+            ->where('created_at', '<', $nextYearStart)
+            ->selectRaw("{$monthExpression} as transaction_month, SUM(business_revenue) as monthly_revenue")
+            ->groupByRaw($monthExpression)
+            ->pluck('monthly_revenue', 'transaction_month');
 
-        for ($m = 1; $m <= 12; $m++) {
-            $monthName = Carbon::create(now()->year, $m, 1)->format('M');
-            $months->push($monthName);
-
-            $rev = WashTransaction::whereYear('created_at', now()->year)
-                ->whereMonth('created_at', $m)
-                ->where('status', 'completed')
-                ->sum('business_revenue');
-
-            $revenues->push((float) $rev);
-        }
+        $months = collect(range(1, 12));
+        $labels = $months->map(fn (int $month): string => Carbon::create($yearStart->year, $month, 1)->format('M'));
+        $revenues = $months->map(fn (int $month): float => (float) ($monthlyRevenue[$month] ?? 0));
 
         return [
             'datasets' => [
                 [
                     'label' => 'Pendapatan Usaha (Rp)',
-                    'data' => $revenues->toArray(),
+                    'data' => $revenues->all(),
                     'backgroundColor' => '#4BC0C0',
                     'borderColor' => '#4BC0C0',
                 ],
             ],
-            'labels' => $months->toArray(),
+            'labels' => $labels->all(),
         ];
     }
 

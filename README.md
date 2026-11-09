@@ -22,6 +22,33 @@ Gunakan kredensial berikut pada halaman `/admin/login`:
 
 Akun ini hanya untuk pengembangan lokal. Ganti kata sandi dan jangan gunakan kredensial demo ini di lingkungan produksi.
 
+## Checklist deployment produksi
+
+Jalankan deployment dari direktori aplikasi, setelah mengatur `.env` produksi di server. Jangan mengunggah `.env` ke Git.
+
+Atur sekurang-kurangnya `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` ke alamat HTTPS aplikasi, zona waktu yang sesuai, `APP_KEY` yang tetap, dan koneksi database produksi. Hindari SQLite untuk aplikasi multi-pengguna. Gunakan Redis untuk cache, session, dan queue bila layanan Redis tersedia; bila tidak, driver database tetap dapat digunakan, tetapi setiap layanan harus didukung oleh tabel migrasi.
+
+Bangun aset frontend saat proses build/deployment, bukan pada setiap request:
+
+```bash
+npm ci
+npm run build
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+```
+
+Setelah kode dan aset terpasang, jalankan perintah berikut dalam maintenance window:
+
+```bash
+php artisan down
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize
+php artisan queue:restart
+php artisan up
+```
+
+`queue:restart` memberi tahu worker yang sedang berjalan untuk memuat ulang kode; jalankan hanya bila worker queue digunakan, dan pastikan pengelola proses server menjalankannya kembali. Arahkan document root web server ke folder `public`, aktifkan HTTPS, OPcache, kompresi respons, serta cache browser untuk aset ber-hash di `public/build`. Pastikan direktori `storage` dan `bootstrap/cache` dapat ditulis oleh pengguna PHP. Setelah mengubah konfigurasi deployment, `php artisan optimize:clear` dapat dipakai untuk menghapus cache aplikasi sebelum membuat ulang cache dengan `php artisan optimize`.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

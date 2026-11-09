@@ -29,11 +29,23 @@ class WasherStatsOverviewWidget extends BaseWidget
         /** @var User $user */
         $user = Auth::user();
         $washerId = $user ? $user->id : 0;
+        $todayStart = today()->startOfDay();
+        $monthStart = now()->startOfMonth();
+        $tomorrowStart = $todayStart->copy()->addDay();
+        $transactions = WashTransaction::query()
+            ->where('washer_id', $washerId)
+            ->where('created_at', '>=', $monthStart)
+            ->where('created_at', '<', $tomorrowStart)
+            ->selectRaw(
+                'SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as today_washes, SUM(CASE WHEN created_at >= ? AND status = ? THEN 1 ELSE 0 END) as completed_washes, SUM(CASE WHEN created_at >= ? AND status = ? THEN commission_amount ELSE 0 END) as earnings_today, SUM(CASE WHEN status = ? THEN commission_amount ELSE 0 END) as earnings_month',
+                [$todayStart, $todayStart, 'completed', $todayStart, 'completed', 'completed'],
+            )
+            ->first();
 
-        $todayWashes = WashTransaction::where('washer_id', $washerId)->whereDate('created_at', today())->count();
-        $completedWashes = WashTransaction::where('washer_id', $washerId)->whereDate('created_at', today())->where('status', 'completed')->count();
-        $earningsToday = WashTransaction::where('washer_id', $washerId)->whereDate('created_at', today())->where('status', 'completed')->sum('commission_amount');
-        $earningsMonth = WashTransaction::where('washer_id', $washerId)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->where('status', 'completed')->sum('commission_amount');
+        $todayWashes = (int) $transactions->today_washes;
+        $completedWashes = (int) $transactions->completed_washes;
+        $earningsToday = (float) $transactions->earnings_today;
+        $earningsMonth = (float) $transactions->earnings_month;
 
         return [
             Stat::make('Cucian Saya Hari Ini', $todayWashes)
