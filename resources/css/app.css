@@ -1,0 +1,396 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "../views/filament/**/*.blade.php";
+@source "../js/**/*.js";
+
+.wash-vehicle-options.fi-fo-radio,
+.wash-vehicle-type-options.fi-fo-radio,
+.wash-service-options.fi-fo-radio {
+    display: grid;
+    gap: 0.625rem;
+}
+
+.wash-vehicle-options.fi-fo-radio {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wash-vehicle-options.fi-grid-direction-col,
+.wash-vehicle-type-options.fi-grid-direction-col,
+.wash-service-options.fi-grid-direction-col {
+    margin-block-start: 0;
+}
+
+.wash-vehicle-step .fi-fo-field {
+    min-width: 0;
+}
+
+.wash-vehicle-step .fi-fo-field-label-col {
+    margin-block-end: 0.5rem;
+}
+
+.wash-vehicle-options .fi-fo-radio-label,
+.wash-vehicle-type-options .fi-fo-radio-label,
+.wash-service-options .fi-fo-radio-label {
+    min-width: 0;
+    align-items: flex-start;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    background: #fff;
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.wash-vehicle-options .fi-fo-radio-label {
+    min-height: 4.5rem;
+    align-items: center;
+}
+
+.wash-vehicle-options .fi-fo-radio-label:has(.fi-radio-input:checked) {
+    border-color: #d97706;
+    background: #fffbeb;
+    box-shadow: 0 0 0 2px rgb(217 119 6 / 12%);
+}
+
+.wash-vehicle-type-options .fi-fo-radio-label:has(.fi-radio-input:checked) {
+    border-color: #d97706;
+    background: #fffbeb;
+    box-shadow: 0 0 0 2px rgb(217 119 6 / 12%);
+}
+
+.wash-service-options .fi-fo-radio-label:has(.fi-radio-input:checked) {
+    border-color: #d97706;
+    background: #fffbeb;
+    box-shadow: 0 0 0 2px rgb(217 119 6 / 12%);
+}
+
+.wash-vehicle-options .fi-radio-input,
+.wash-vehicle-type-options .fi-radio-input,
+.wash-service-options .fi-radio-input {
+    margin-top: 0.25rem !important;
+    accent-color: #d97706;
+}
+
+.wash-vehicle-options .fi-fo-radio-label-text,
+.wash-vehicle-type-options .fi-fo-radio-label-text,
+.wash-service-options .fi-fo-radio-label-text {
+    min-width: 0;
+    flex: 1;
+    gap: 0.125rem;
+}
+
+.wash-vehicle-options .fi-fo-radio-label-text > p:first-child,
+.wash-vehicle-type-options .fi-fo-radio-label-text > p:first-child,
+.wash-service-options .fi-fo-radio-label-text > p:first-child {
+    font-weight: 600;
+}
+
+.wash-vehicle-options .fi-fo-radio-label-description,
+.wash-vehicle-type-options .fi-fo-radio-label-description,
+.wash-service-options .fi-fo-radio-label-description {
+    color: #b45309 !important;
+    font-size: 0.875rem;
+    font-weight: 600 !important;
+}
+
+.wash-vehicle-type-options .fi-fo-radio-label-description,
+.wash-service-options .fi-fo-radio-label-description {
+    white-space: pre-line;
+}
+
+.wash-vehicle-type-options .fi-fo-radio-label-description,
+.wash-service-options .fi-fo-radio-label-description {
+    line-height: 1.5;
+}
+
+.wash-vehicle-type-options .fi-fo-radio-label-description {
+    color: #475569 !important;
+    font-size: 0.8125rem;
+    font-weight: 500 !important;
+}
+
+.wash-vehicle-options .fi-fo-radio-label:hover,
+.wash-vehicle-type-options .fi-fo-radio-label:hover,
+.wash-service-options .fi-fo-radio-label:hover {
+    border-color: #f59e0b;
+}
+
+.wash-camera-panel {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 42rem;
+}
+
+.wash-camera-heading {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.wash-camera-help {
+    color: #64748b;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.wash-camera-preview {
+    position: relative;
+    display: grid;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 1rem;
+    background: #0f172a;
+}
+
+.wash-camera-preview video,
+.wash-camera-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wash-camera-placeholder {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    color: #cbd5e1;
+    font-size: 0.875rem;
+}
+
+.wash-camera-error {
+    color: #b91c1c;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.wash-camera-success {
+    color: #047857;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.wash-camera-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+.wash-camera-button {
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    font-weight: 600;
+}
+
+.wash-camera-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.wash-camera-button-primary {
+    background: #d97706;
+    color: white;
+}
+
+.wash-camera-button-primary:hover {
+    background: #b45309;
+}
+
+.wash-camera-button-secondary {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #334155;
+}
+
+.fi-wi-stats-overview {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0;
+}
+
+.fi-wi-stats-overview > .fi-sc {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+}
+
+.fi-wi-stats-overview > .fi-sc > .fi-sc-component {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    min-width: 0;
+}
+
+.fi-wi-stats-overview .fi-section-content.fi-sc {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    width: 100% !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat {
+    --stat-accent: #2563eb;
+    --stat-surface: #eff6ff;
+
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--stat-accent) 18%, white) !important;
+    border-inline-start: 4px solid var(--stat-accent) !important;
+    background: linear-gradient(145deg, var(--stat-surface), #fff 82%) !important;
+    box-shadow: 0 4px 14px rgb(15 23 42 / 5%) !important;
+    transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.fi-wi-stats-overview .fi-section-content > .fi-grid-col:nth-child(2) .fi-wi-stats-overview-stat {
+    --stat-accent: #059669;
+    --stat-surface: #ecfdf5;
+}
+
+.fi-wi-stats-overview .fi-section-content > .fi-grid-col:nth-child(3) .fi-wi-stats-overview-stat {
+    --stat-accent: #d97706;
+    --stat-surface: #fffbeb;
+}
+
+.fi-wi-stats-overview .fi-section-content > .fi-grid-col:nth-child(4) .fi-wi-stats-overview-stat {
+    --stat-accent: #7c3aed;
+    --stat-surface: #f5f3ff;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-label {
+    color: #475569 !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-value {
+    color: #0f172a !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-description,
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-description .fi-icon {
+    color: var(--stat-accent) !important;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat-description .fi-icon {
+    flex: 0 0 auto;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--stat-accent) 10%, white);
+    padding: 0.25rem;
+}
+
+.fi-wi-stats-overview .fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 10px 24px rgb(15 23 42 / 10%) !important;
+    transform: translateY(-2px);
+}
+
+.mobile-wash-action {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 767px) {
+    .wash-vehicle-step .fi-sc-component {
+        min-width: 0;
+    }
+
+    .wash-vehicle-options.fi-grid-direction-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .wash-vehicle-options .fi-fo-radio-label {
+        min-height: 4.25rem;
+        padding: 0.75rem;
+    }
+
+    .wash-vehicle-type-options.fi-fo-radio {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wash-vehicle-type-options .fi-fo-radio-label {
+        min-height: 6rem;
+        padding: 0.875rem;
+    }
+
+    .wash-vehicle-step .fi-fo-field-label {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .wash-camera-panel {
+        width: 100%;
+    }
+
+    .fi-main {
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+    }
+
+    .fi-wi-stats-overview {
+        min-width: 0;
+    }
+
+    .fi-wi-stats-overview .fi-section-content.fi-sc {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-section-content.fi-sc > .fi-sc-component {
+        grid-column: span 1 !important;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat {
+        box-sizing: border-box;
+        display: block;
+        height: 100%;
+        min-width: 0;
+        min-height: 8.5rem;
+        padding: 1rem !important;
+        border-radius: 1rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-content {
+        width: 100%;
+        min-width: 0;
+        gap: 0.375rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-label-ctn {
+        min-width: 0;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-label {
+        min-width: 0;
+        font-size: 0.875rem !important;
+        line-height: 1.25rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-value,
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-placeholder {
+        overflow-wrap: anywhere;
+        font-size: clamp(1rem, 4.8vw, 1.375rem) !important;
+        line-height: 1.2 !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-description {
+        align-items: flex-start;
+        gap: 0.25rem !important;
+        font-size: 0.75rem !important;
+        line-height: 1rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-description > span {
+        flex: 1;
+        min-width: 0;
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+}
+
+@media (max-width: 379px) {
+    .wash-vehicle-options.fi-grid-direction-col {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fi-wi-stats-overview .fi-section-content.fi-sc {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
