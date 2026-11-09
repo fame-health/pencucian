@@ -420,6 +420,28 @@
     }
 
     .fi-wi-stats-overview .fi-section-content.fi-sc {
-        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.5rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat {
+        min-height: 7rem;
+        padding: 0.625rem !important;
+        border-radius: 0.75rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-label {
+        font-size: 0.75rem !important;
+        line-height: 1rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-value,
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-placeholder {
+        font-size: 1rem !important;
+    }
+
+    .fi-wi-stats-overview .fi-wi-stats-overview-stat-description {
+        font-size: 0.625rem !important;
+        line-height: 0.875rem !important;
     }
 }
