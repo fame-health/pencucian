@@ -1,6 +1,6 @@
 /.phpunit.cache
 /node_modules
-/public/build
+
 /public/css/filament
 /public/fonts/filament
 /public/hot
