@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WashingServiceResource\Pages;
+use App\Models\VehicleType;
 use App\Models\WashingService;
 use Filament\Actions;
 use Filament\Forms;
@@ -28,24 +29,29 @@ class WashingServiceResource extends Resource
         return $schema
             ->schema([
                 Forms\Components\Select::make('vehicle_type_id')
-                    ->label('Jenis Kendaraan')
+                    ->label('Kelas / Tipe Kendaraan')
                     ->relationship('vehicleType', 'name')
+                    ->getOptionLabelFromRecordUsing(fn (VehicleType $record): string => strtoupper($record->category).' · '.$record->name)
                     ->searchable()
                     ->preload()
+                    ->helperText('Pilih kelas yang sesuai dengan tarif. Contoh: MOTOR · Matic kecil.')
                     ->required(),
                 Forms\Components\TextInput::make('name')
-                    ->label('Nama Layanan')
-                    ->placeholder('Contoh: Cuci Salju & Wax')
+                    ->label('Nama Paket Layanan')
+                    ->placeholder('Contoh: Cuci Reguler, Cuci Premium')
+                    ->helperText('Nama paket yang akan dipilih pencuci saat mencatat transaksi.')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
-                    ->label('Deskripsi Layanan')
+                    ->label('Rincian Paket (Opsional)')
+                    ->placeholder('Contoh: Cuci bodi, semir ban, dan lap kering')
                     ->rows(3)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('price')
-                    ->label('Harga (Rp)')
+                    ->label('Harga untuk Kelas Ini (Rp)')
                     ->numeric()
                     ->prefix('Rp')
+                    ->helperText('Harga yang dibayar pelanggan untuk paket dan kelas kendaraan ini.')
                     ->required(),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Status Aktif')
@@ -63,7 +69,7 @@ class WashingServiceResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vehicleType.name')
-                    ->label('Jenis Kendaraan')
+                    ->label('Kelas Kendaraan')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vehicleType.category')
                     ->label('Kategori')
@@ -90,7 +96,9 @@ class WashingServiceResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                Actions\DeleteAction::make()
+                    ->failureNotificationTitle('Data gagal dihapus')
+                    ->failureNotificationBody('Layanan tidak dapat dihapus. Periksa apakah data masih digunakan.'),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([

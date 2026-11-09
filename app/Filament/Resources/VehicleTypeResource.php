@@ -28,12 +28,19 @@ class VehicleTypeResource extends Resource
         return $schema
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Nama Kendaraan / Tipe')
-                    ->placeholder('Contoh: Motor Matic, Mobil SUV')
+                    ->label('Kelas / Tipe Kendaraan')
+                    ->placeholder('Contoh: Matic kecil, Matic besar, Mobil MPV')
+                    ->helperText('Buat kelas kendaraan yang harganya sama. Contoh: Matic kecil dan Matic besar.')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Textarea::make('examples')
+                    ->label('Contoh Model Kendaraan')
+                    ->placeholder('Contoh: Beat, Supra')
+                    ->helperText('Isi contoh merek atau model agar pencuci mudah mencocokkan kendaraan pelanggan.')
+                    ->rows(2)
+                    ->columnSpanFull(),
                 Forms\Components\Select::make('category')
-                    ->label('Kategori')
+                    ->label('Kategori Kendaraan')
                     ->options([
                         'motor' => 'Motor',
                         'mobil' => 'Mobil',
@@ -51,9 +58,13 @@ class VehicleTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Nama / Tipe Kendaraan')
+                    ->label('Kelas / Tipe Kendaraan')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('examples')
+                    ->label('Contoh Model')
+                    ->placeholder('-')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('category')
                     ->label('Kategori')
                     ->badge()
@@ -81,7 +92,9 @@ class VehicleTypeResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                Actions\DeleteAction::make()
+                    ->failureNotificationTitle('Data gagal dihapus')
+                    ->failureNotificationBody('Jenis kendaraan tidak dapat dihapus. Periksa apakah data masih digunakan.'),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([

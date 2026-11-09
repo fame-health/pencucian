@@ -50,7 +50,9 @@ class EditWashTransaction extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->failureNotificationTitle('Transaksi gagal dihapus')
+                ->failureNotificationBody('Transaksi tidak dapat dihapus. Silakan coba kembali.'),
         ];
     }
 }

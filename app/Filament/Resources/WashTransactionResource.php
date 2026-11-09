@@ -61,7 +61,7 @@ class WashTransactionResource extends Resource
             ->schema([
                 Wizard::make([
                     Step::make('Pilih Kendaraan')
-                        ->description('Pilih jenis kendaraan. Harga dan komisi tampil di setiap kartu.')
+                        ->description('Pilih kategori dan kelas yang cocok dengan kendaraan pelanggan. Periksa layanan, harga, dan komisi sebelum lanjut.')
                         ->extraAttributes(['class' => 'wash-vehicle-step'])
                         ->schema([
                             Forms\Components\Select::make('washer_id')
@@ -76,7 +76,7 @@ class WashTransactionResource extends Resource
                                 ->visible($isAdmin),
 
                             Forms\Components\Radio::make('vehicle_category')
-                                ->label('Jenis kendaraan')
+                                ->label('Kategori kendaraan')
                                 ->options([
                                     'motor' => 'Motor',
                                     'mobil' => 'Mobil',
@@ -113,32 +113,36 @@ class WashTransactionResource extends Resource
                                     ->orderBy('name')
                                     ->get()
                                     ->mapWithKeys(function (VehicleType $vehicleType) use ($get): array {
-                                        $name = strtolower($vehicleType->name);
-
-                                        $size = match (true) {
-                                            $vehicleType->category === 'motor' && (str_contains($name, 'sport') || str_contains($name, 'big')) => 'Ukuran besar · motor sport / big bike',
-                                            $vehicleType->category === 'motor' => 'Ukuran standar · motor matic / bebek',
-                                            str_contains($name, 'small') || str_contains($name, 'hatchback') => 'Ukuran kecil · city car / hatchback',
-                                            default => 'Ukuran besar · MPV / SUV',
-                                        };
-
                                         $washerId = $get('washer_id') ?? (Auth::user()?->hasRole('washer') ? Auth::id() : null);
                                         $commissionSetting = $washerId
                                             ? WasherCommission::query()->where('user_id', $washerId)->first()
                                             : null;
                                         $transactionService = app(TransactionService::class);
                                         $serviceDetails = $vehicleType->services
-                                            ->map(fn (WashingService $service): string => $service->name
-                                                ."\nHarga Rp ".number_format((float) $service->price, 0, ',', '.')
-                                                .' · Komisi Rp '.number_format(
+                                            ->map(function (WashingService $service) use ($transactionService, $commissionSetting): string {
+                                                $details = [$service->name];
+
+                                                if (filled($service->description)) {
+                                                    $details[] = trim($service->description);
+                                                }
+
+                                                $details[] = 'Harga Rp '.number_format((float) $service->price, 0, ',', '.')
+                                                    .' · Komisi Rp '.number_format(
                                                     $transactionService->calculateCommissionAmount((float) $service->price, $commissionSetting),
                                                     0,
                                                     ',',
                                                     '.',
-                                                ))
+                                                    );
+
+                                                return implode("\n", $details);
+                                            })
                                             ->implode("\n");
 
-                                        return [$vehicleType->id => $size."\n".$serviceDetails];
+                                        $vehicleExamples = filled($vehicleType->examples)
+                                            ? 'Contoh model: '.trim($vehicleType->examples)
+                                            : 'Cocokkan kelas kendaraan dengan kendaraan pelanggan.';
+
+                                        return [$vehicleType->id => $vehicleExamples."\n".$serviceDetails];
                                     })
                                     ->all())
                                 ->columns(2)
@@ -158,12 +162,12 @@ class WashTransactionResource extends Resource
                                         $set('washing_service_id', $serviceIds->first());
                                     }
                                 })
-                                ->helperText('Pilih kartu kendaraan yang sesuai. Harga dan komisi dihitung otomatis.')
+                                ->helperText('Cocokkan kelas dan contoh model pada kartu dengan kendaraan pelanggan.')
                                 ->required()
                                 ->columnSpanFull(),
 
                             Forms\Components\Radio::make('washing_service_id')
-                                ->label('Pilih paket pencucian')
+                                ->label('Pilih paket layanan')
                                 ->options(fn (Get $get): array => WashingService::query()
                                     ->where('is_active', true)
                                     ->where('vehicle_type_id', $get('vehicle_type_id'))
@@ -181,21 +185,25 @@ class WashTransactionResource extends Resource
                                             ? WasherCommission::query()->where('user_id', $washerId)->first()
                                             : null;
 
-                                        return [
-                                            $service->id => 'Harga Rp '.number_format((float) $service->price, 0, ',', '.')
+                                        $priceAndCommission = 'Harga Rp '.number_format((float) $service->price, 0, ',', '.')
                                                 .' · Komisi Rp '.number_format(
                                                     app(TransactionService::class)->calculateCommissionAmount((float) $service->price, $commissionSetting),
                                                     0,
                                                     ',',
                                                     '.',
-                                                ),
+                                                );
+
+                                        return [
+                                            $service->id => filled($service->description)
+                                                ? trim($service->description)."\n".$priceAndCommission
+                                                : $priceAndCommission,
                                         ];
                                     })
                                     ->all())
                                 ->columns(2)
                                 ->extraAttributes(['class' => 'wash-service-options'])
                                 ->dehydrated()
-                                ->helperText('Pilih paket jika tipe kendaraan memiliki lebih dari satu layanan.')
+                                ->helperText('Pilih paket yang diminta pelanggan. Harga dan komisi tercantum di bawah nama paket.')
                                 ->visible(fn (Get $get): bool => filled($get('vehicle_type_id')) && WashingService::query()
                                     ->where('is_active', true)
                                     ->where('vehicle_type_id', $get('vehicle_type_id'))

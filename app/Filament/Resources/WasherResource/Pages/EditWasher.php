@@ -51,7 +51,9 @@ class EditWasher extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->failureNotificationTitle('Data gagal dihapus')
+                ->failureNotificationBody('Data pencuci tidak dapat dihapus. Periksa apakah data masih digunakan.'),
         ];
     }
 }

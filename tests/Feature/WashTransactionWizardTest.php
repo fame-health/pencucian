@@ -34,7 +34,8 @@ class WashTransactionWizardTest extends TestCase
         $washer->assignRole('washer');
 
         $vehicleType = VehicleType::create([
-            'name' => 'Motor Matic',
+            'name' => 'Matic kecil',
+            'examples' => 'Beat, Supra',
             'category' => 'motor',
             'is_active' => true,
         ]);
@@ -42,6 +43,7 @@ class WashTransactionWizardTest extends TestCase
         WashingService::create([
             'vehicle_type_id' => $vehicleType->id,
             'name' => 'Cuci Standard',
+            'description' => 'Cuci bodi dan lap kering',
             'price' => 20000,
             'is_active' => true,
         ]);
@@ -56,6 +58,11 @@ class WashTransactionWizardTest extends TestCase
             ->assertSee('Foto & Simpan')
             ->assertSee('Motor')
             ->assertSee('Mobil')
+            ->assertSee('Matic kecil')
+            ->assertSee('Contoh model: Beat, Supra')
+            ->assertSee('Cuci Standard')
+            ->assertSee('Cuci bodi dan lap kering')
+            ->assertSee('Harga Rp 20.000')
             ->assertSee('Komisi Rp')
             ->assertSee('navigator.mediaDevices', escape: false)
             ->assertSee('cameraRequested', escape: false)
