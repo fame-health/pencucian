@@ -30,7 +30,7 @@ class WashTransactionResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Transaksi';
+    protected static \UnitEnum|string|null $navigationGroup = 'Laporan';
 
     protected static ?string $modelLabel = 'Transaksi Pencucian';
 

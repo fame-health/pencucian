@@ -23,7 +23,7 @@ class WasherResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Pengguna';
+    protected static \UnitEnum|string|null $navigationGroup = 'Master Data';
 
     protected static ?string $modelLabel = 'Pencuci';
 

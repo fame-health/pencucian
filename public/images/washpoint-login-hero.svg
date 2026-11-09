@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" fill="none">
+  <defs>
+    <linearGradient id="wall" x1="800" y1="0" x2="800" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31485A"/>
+      <stop offset=".58" stop-color="#647681"/>
+      <stop offset="1" stop-color="#B5C4C3"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="800" y1="590" x2="800" y2="1100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#829497"/>
+      <stop offset="1" stop-color="#344B59"/>
+    </linearGradient>
+    <linearGradient id="carPaint" x1="800" y1="590" x2="1350" y2="830" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6FAF8"/>
+      <stop offset=".48" stop-color="#B8CCD0"/>
+      <stop offset="1" stop-color="#718B97"/>
+    </linearGradient>
+    <linearGradient id="bikePaint" x1="500" y1="700" x2="760" y2="830" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6AA38"/>
+      <stop offset="1" stop-color="#D8731E"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="960" y1="570" x2="1230" y2="685" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7FA4B3"/>
+      <stop offset="1" stop-color="#29485C"/>
+    </linearGradient>
+    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="matrix(0 670 -950 0 820 130)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE7B7" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#FFE7B7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB" filterUnits="objectBoundingBox">
+      <feGaussianBlur stdDeviation="23"/>
+    </filter>
+  </defs>
+  <path fill="url(#wall)" d="M0 0h1600v1100H0z"/>
+  <path fill="url(#light)" d="M0 0h1600v1100H0z"/>
+  <path fill="#172F40" fill-opacity=".72" d="M0 0h1600v74H0z"/>
+  <path stroke="#E4D9C6" stroke-opacity=".35" stroke-width="14" d="M90 74v480m1420-480v480M0 520h1600"/>
+  <path stroke="#FFF4DF" stroke-opacity=".52" stroke-width="10" d="M330 96h350m240 0h350"/>
+  <path fill="#F8D38D" fill-opacity=".2" d="M360 105h290v15H360zm600 0h290v15H960z"/>
+  <path fill="url(#floor)" d="M0 540h1600v560H0z"/>
+  <path stroke="#ECF3EF" stroke-opacity=".24" stroke-width="4" d="m0 665 1600-40M0 820l1600-80M0 980l1600-115"/>
+  <path fill="#172F40" fill-opacity=".45" d="M0 1012c290-60 512-29 760-45 285-19 555-98 840-70v203H0v-88Z"/>
+  <ellipse cx="1040" cy="874" fill="#152B39" fill-opacity=".48" rx="480" ry="62" filter="url(#shadow)"/>
+  <ellipse cx="640" cy="866" fill="#152B39" fill-opacity=".48" rx="210" ry="40" filter="url(#shadow)"/>
+  <path fill="#E5F4F4" fill-opacity=".55" d="M404 815c60-24 154-26 236-7 54 12 82 30 88 47-112 14-232 10-340-9-24-4-25-20 16-31Zm487 44c182-45 413-47 638-9 44 8 61 24 31 39-190 50-424 56-646 12-61-12-72-27-23-42Z"/>
+
+  <g stroke="#142C3B" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="572" cy="827" r="49" fill="#182B35" stroke-width="12"/>
+    <circle cx="572" cy="827" r="22" fill="#AEBFC0" stroke-width="8"/>
+    <circle cx="754" cy="827" r="49" fill="#182B35" stroke-width="12"/>
+    <circle cx="754" cy="827" r="22" fill="#AEBFC0" stroke-width="8"/>
+    <path d="m574 821 60-87 76 9 44 84m-120-93 54 90h-97l-17-35m64-55-41-20-20 34m82-5 41-46 37 9" stroke-width="18"/>
+    <path fill="url(#bikePaint)" stroke-width="9" d="m604 731 37-30 65 6 25 38-42 17-70-5-15-26Z"/>
+    <path fill="#263D4C" stroke-width="9" d="m647 697 13-27 53 5 20 34-48-4-38-8Z"/>
+    <path d="m658 671 40-12 24 13m-4 38 41 5m-117 106 18-68m67 65-19-60" stroke-width="10"/>
+    <path fill="#F8F3DE" stroke-width="7" d="m770 785 30 8-6 18-32-3 8-23Z"/>
+    <path stroke="#EFF6F3" stroke-width="8" d="m800 797 54-22"/>
+  </g>
+
+  <g stroke="#183444" stroke-linejoin="round">
+    <path fill="url(#carPaint)" stroke-width="12" d="m838 735 55-99c24-44 66-70 116-75l189-17c51-5 101 14 137 52l71 75 82 22c26 7 44 30 44 57v83H812v-63c0-16 9-30 26-35Z"/>
+    <path fill="url(#glass)" stroke-width="10" d="m940 638 28-45c17-28 43-44 76-47l75-7v109H940Zm204-101 47-4c36-3 70 10 95 36l50 53h-192V537Z"/>
+    <path stroke="#EFF5F2" stroke-opacity=".8" stroke-width="8" d="m843 737 55-18 126 2m239-6 144 10"/>
+    <path fill="#203747" stroke-width="11" d="M891 802a76 76 0 1 0 152 0 76 76 0 0 0-152 0Zm405 0a76 76 0 1 0 152 0 76 76 0 0 0-152 0Z"/>
+    <circle cx="967" cy="802" r="37" fill="#AFBEC0" stroke-width="10"/>
+    <circle cx="1372" cy="802" r="37" fill="#AFBEC0" stroke-width="10"/>
+    <path fill="#FFF2D3" stroke-width="6" d="m1459 713 48 13v34l-57-7 9-40Z"/>
+    <path fill="#F1A15B" stroke-width="6" d="m831 756 42-11v35l-47 8 5-32Z"/>
+  </g>
+
+  <g stroke="#173243" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+    <path fill="#D99569" d="m1118 482 29-8 30 42 20 82-21 7-35-70-28-53Z"/>
+    <path fill="#E8B34A" d="m1114 492-48 38-33 86 23 10 48-67 46-31-36-36Z"/>
+    <path fill="#E2AD89" d="m1140 450 16-41 47 7 18 42-24 36-49-9-8-35Z"/>
+    <path fill="#253C4B" d="m1139 451-18-20 7-37 33-24 43 14 14 38-23 5-14-23-24 6-7 35-11 6Z"/>
+    <path fill="#D99569" d="m1057 607-26 50-33 51 18 12 51-48 32-48-42-17Z"/>
+    <path fill="#D99569" d="m1178 603 13 54 47 53 17-15-29-62-6-44-42 14Z"/>
+  </g>
+  <path stroke="#D8ECF0" stroke-linecap="round" stroke-width="8" d="m1035 607-54 106m139-101-51 108m190-105 43 105m-3-186 126 58"/>
+  <path fill="#DDF5F3" fill-opacity=".8" d="M990 719a12 12 0 1 1-24 0 12 12 0 0 1 24 0Zm192-29a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm237 59a13 13 0 1 1-26 0 13 13 0 0 1 26 0ZM442 733a10 10 0 1 1-20 0 10 10 0 0 1 20 0Zm300-118a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm205-59a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+  <path stroke="#F0B04D" stroke-linecap="round" stroke-width="6" d="m720 948 310-20m-605 47 160-10m520 45 260-20"/>
+</svg>

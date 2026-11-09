@@ -67,8 +67,9 @@
             overflow: hidden;
             padding: 48px;
             background:
-                radial-gradient(ellipse at 85% 15%, rgb(255 255 255 / 12%), transparent 34%),
-                radial-gradient(ellipse at 5% 90%, rgb(245 158 11 / 15%), transparent 36%),
+                linear-gradient(90deg, rgb(15 35 51 / 94%) 0%, rgb(15 35 51 / 76%) 48%, rgb(15 35 51 / 36%) 100%),
+                linear-gradient(0deg, rgb(15 35 51 / 32%), transparent 48%),
+                url("/images/washpoint-login-hero.svg") center / cover,
                 #172b3b;
             color: #fff;
         }
@@ -348,19 +349,31 @@
             }
 
             .login-brand-panel {
+                display: block;
+                min-height: 190px;
+                height: 190px;
+                padding: 0;
+            }
+
+            .login-brand-panel > * {
+                display: none;
+            }
+
+            .login-brand-panel::before,
+            .login-brand-panel::after {
                 display: none;
             }
 
             .login-form-panel {
                 align-items: flex-start;
-                padding: max(42px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
+                padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
             }
 
             .login-mobile-brand {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                margin-bottom: clamp(42px, 9vh, 76px);
+                margin-bottom: 28px;
             }
 
             .login-mobile-brand .login-brand-mark {
