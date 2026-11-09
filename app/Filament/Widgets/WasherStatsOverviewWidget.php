@@ -12,6 +12,11 @@ class WasherStatsOverviewWidget extends BaseWidget
 {
     protected int|string|array $columnSpan = 'full';
 
+    protected int|array|null $columns = [
+        'default' => 2,
+        'lg' => 4,
+    ];
+
     public static function canView(): bool
     {
         /** @var User $user */
